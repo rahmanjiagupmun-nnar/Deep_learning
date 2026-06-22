@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Partie 1 — Classification Census Income{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-eyebrow">Partie 1 — Methodes Classiques & Ensemble</div>
+    <h1 class="hero-title">Classification — Census Income Dataset</h1>
+    <p class="hero-subtitle">
+      Analyse exploratoire, pretraitement, arbres de decision, Bagging, Random Forest,
+      Gradient Boosting, courbes ROC et importance des variables sur le dataset Census Income.
+    </p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  {% if not has_data %}
+  <div class="alert alert-warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <div>
+      <strong>Donnees non disponibles.</strong>
+      Aucune figure trouvee dans le dossier <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">outputs_tp1/</code>.
+      Executez d'abord le script <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">dashboard_census.py</code>
+      pour generer les figures, puis relancez le serveur Flask.
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Contexte -->
+  <div class="alert alert-green" style="margin-bottom:2rem;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div>
+      <strong>Dataset Census Income :</strong>
+      48 842 individus americains decrits par 14 variables (age, education, profession, etc.).
+      Tache : predire si le revenu annuel depasse ou non 50 000$. Le desequilibre de classes (~76% vs ~24%)
+      justifie l'utilisation du <strong>F1-Score</strong> comme metrique d'optimisation principale.
+    </div>
+  </div>
+
+  <!-- Stats rapides -->
+  <div class="stat-row">
+    <div class="stat-chip">
+      <div class="stat-label">Instances totales</div>
+      <div class="stat-value">48 842</div>
+      <div class="stat-sub">apres chargement</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Classe majoritaire</div>
+      <div class="stat-value">76.1%</div>
+      <div class="stat-sub">revenus &lt;=50K</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Features encodees</div>
+      <div class="stat-value">100+</div>
+      <div class="stat-sub">apres one-hot</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Modeles evalues</div>
+      <div class="stat-value">9</div>
+      <div class="stat-sub">classifieurs</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Figures generees</div>
+      <div class="stat-value">{{ images|length }}</div>
+      <div class="stat-sub">visualisations</div>
+    </div>
+  </div>
+
+  <!-- Resultats synthetiques -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Synthese des Performances</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Modele</th>
+            <th>Accuracy</th>
+            <th>F1-Score</th>
+            <th>AUC</th>
+            <th>Complexite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Classifieur constant (baseline)</td>
+            <td class="mono">~0.761</td>
+            <td class="mono">0.000</td>
+            <td class="mono">0.500</td>
+            <td>Aucune</td>
+          </tr>
+          <tr>
+            <td>Arbre de Decision (simple, depth=3)</td>
+            <td class="mono">~0.830</td>
+            <td class="mono">~0.650</td>
+            <td class="mono">~0.810</td>
+            <td>Tres faible</td>
+          </tr>
+          <tr>
+            <td>Arbre de Decision (optimise)</td>
+            <td class="mono">~0.855</td>
+            <td class="mono">~0.700</td>
+            <td class="mono">~0.860</td>
+            <td>Faible</td>
+          </tr>
+          <tr>
+            <td>Regression Logistique</td>
+            <td class="mono">~0.850</td>
+            <td class="mono">~0.695</td>
+            <td class="mono">~0.895</td>
+            <td>Faible</td>
+          </tr>
+          <tr>
+            <td>KNN (k=5)</td>
+            <td class="mono">~0.840</td>
+            <td class="mono">~0.660</td>
+            <td class="mono">~0.858</td>
+            <td>Moyenne</td>
+          </tr>
+          <tr>
+            <td>Naive Bayes</td>
+            <td class="mono">~0.825</td>
+            <td class="mono">~0.630</td>
+            <td class="mono">~0.870</td>
+            <td>Tres faible</td>
+          </tr>
+          <tr style="background:var(--green-pale);">
+            <td><strong>Random Forest (200 arbres)</strong> <span class="badge-best">Meilleur</span></td>
+            <td class="mono"><strong>~0.868</strong></td>
+            <td class="mono"><strong>~0.730</strong></td>
+            <td class="mono"><strong>~0.926</strong></td>
+            <td>Elevee</td>
+          </tr>
+          <tr>
+            <td>Gradient Boosting (optimise)</td>
+            <td class="mono">~0.872</td>
+            <td class="mono">~0.728</td>
+            <td class="mono">~0.928</td>
+            <td>Elevee</td>
+          </tr>
+          <tr>
+            <td>AdaBoost (200 estimateurs)</td>
+            <td class="mono">~0.861</td>
+            <td class="mono">~0.715</td>
+            <td class="mono">~0.920</td>
+            <td>Moyenne</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:.78rem; color:var(--gray-500); margin-top:.75rem;">
+        Valeurs approximatives basees sur les sorties du script. Les resultats exacts sont visibles dans les figures ci-dessous.
+        La metrique d'optimisation est le F1-Score, plus adapte que l'accuracy en contexte de classes desequilibrees.
+      </p>
+    </div>
+  </div>
+
+  <!-- Figures par section -->
+  {% set sections_order = ['Exploration', 'Pretraitement', 'Modeles', 'Ensemble', 'Comparaison', 'Evaluation', 'Interpretation', 'Diagnostic', 'General'] %}
+
+  {% for section_name in sections_order %}
+    {% set section_images = images | selectattr('section', 'equalto', section_name) | list %}
+    {% if section_images %}
+
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <span class="section-title">{{ section_name }}</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="figure-grid" style="margin-bottom:1rem;">
+      {% for img in section_images %}
+      <div class="figure-card">
+        <img
+          src="data:image/png;base64,{{ img.data }}"
+          alt="{{ img.title }}"
+          loading="lazy"
+          onclick="openLightbox(this.src, '{{ img.title }}')"
+        />
+        <div class="fig-info">
+          <div class="card-section-label">{{ img.section }}</div>
+          <div class="fig-title">{{ img.title }}</div>
+          <div class="fig-desc">{{ img.description }}</div>
+        </div>
+        <div class="fig-footer">
+          <span class="fig-filename">{{ img.name }}</span>
+          <button class="btn-expand" onclick="openLightbox('data:image/png;base64,{{ img.data }}', '{{ img.title }}')">
+            Agrandir
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  {% endif %}
+
+</div>
+{% endblock %}

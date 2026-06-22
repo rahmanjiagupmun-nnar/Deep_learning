@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+{% block title %}Predictions sur Donnees Reelles{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-eyebrow">Deploiement des modeles optimaux</div>
+    <h1 class="hero-title">Predictions Interactives sur de Nouvelles Donnees</h1>
+    <p class="hero-subtitle">
+      Saisissez de nouvelles valeurs ou dessinez un vetement : le serveur charge les modeles
+      entraines et calcule une vraie prediction en temps reel.
+    </p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <!-- Onglets de sous-partie -->
+  <div style="display:flex; gap:.5rem; margin-bottom:2rem; border-bottom:2px solid var(--gray-100); padding-bottom:.5rem;" id="tab-bar">
+    <button class="tab-btn active" onclick="showPredTab('bank')" id="predtab-bank">
+      Partie 2A — Bank Telemarketing
+    </button>
+    <button class="tab-btn" onclick="showPredTab('fashion')" id="predtab-fashion">
+      Partie 2B — Fashion MNIST
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SOUS-PARTIE A : BANK TELEMARKETING                            -->
+  <!-- ============================================================ -->
+  <div id="predsection-bank">
+
+    <div class="alert alert-green" style="margin-bottom:1.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        Renseignez les 10 variables retenues pour le modele de deploiement
+        (<code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">telemarketing_optimal_top10.keras</code>).
+        Le serveur Flask charge ce modele ainsi que le scaler et calcule la probabilite reelle
+        de souscription au produit bancaire.
+      </div>
+    </div>
+
+    <!-- Bandeau metriques -->
+    {% if metrics_bank %}
+    <div class="stat-row">
+      <div class="stat-chip">
+        <div class="stat-label">Meilleur modele</div>
+        <div class="stat-value" style="font-size:1rem;">{{ metrics_bank.best_model }}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Accuracy</div>
+        <div class="stat-value">{{ "%.1f"|format(metrics_bank.accuracy * 100) }}%</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">F1-Score</div>
+        <div class="stat-value">{{ "%.3f"|format(metrics_bank.f1_score) }}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Precision</div>
+        <div class="stat-value">{{ "%.3f"|format(metrics_bank.precision) }}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Rappel</div>
+        <div class="stat-value">{{ "%.3f"|format(metrics_bank.recall) }}</div>
+      </div>
+      {% if metrics_bank.auc %}
+      <div class="stat-chip">
+        <div class="stat-label">AUC</div>
+        <div class="stat-value">{{ "%.3f"|format(metrics_bank.auc) }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-warn" style="margin-bottom:1.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      <div>
+        <strong>Metriques non disponibles.</strong> Fichier <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">metrics_bank.json</code>
+        introuvable dans <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">outputs_tp2/</code>.
+        Ajoutez la cellule d'export fournie a la fin de la section 13 du notebook, puis re-executez-la.
+      </div>
+    </div>
+    {% endif %}
+
+    <div style="display:grid; grid-template-columns: 1.1fr .9fr; gap:1.5rem; align-items:start;">
+
+      <!-- Formulaire -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 17v-6h6v6M9 11V7a3 3 0 016 0v4M5 21h14a2 2 0 002-2V9.41a2 2 0 00-.59-1.42l-5.4-5.4A2 2 0 0013.59 2H5a2 2 0 00-2 2v15a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Caracteristiques du client</div>
+            <div class="card-desc">10 variables, dans l'ordre d'importance Random Forest</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="bank-form" onsubmit="return false;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: .9rem;">
+
+              <div>
+                <label class="pf-label">Duree du dernier appel (s)</label>
+                <input class="pf-input" type="number" step="1" name="duration" value="520">
+              </div>
+              <div>
+                <label class="pf-label">Taux Euribor 3 mois</label>
+                <input class="pf-input" type="number" step="0.01" name="euribor3m" value="0.65">
+              </div>
+
+              <div>
+                <label class="pf-label">Nombre d'employes (indicateur)</label>
+                <input class="pf-input" type="number" step="0.1" name="nr.employed" value="5099.1">
+              </div>
+              <div>
+                <label class="pf-label">Age du client</label>
+                <input class="pf-input" type="number" step="1" name="age" value="41">
+              </div>
+
+              <div>
+                <label class="pf-label">Contacts durant la campagne</label>
+                <input class="pf-input" type="number" step="1" name="campaign" value="1">
+              </div>
+              <div>
+                <label class="pf-label">Jours depuis dernier contact (pdays)</label>
+                <input class="pf-input" type="number" step="1" name="pdays" value="3">
+              </div>
+
+              <div>
+                <label class="pf-label">Indice confiance consommateurs</label>
+                <input class="pf-input" type="number" step="0.1" name="cons.conf.idx" value="-36.1">
+              </div>
+              <div>
+                <label class="pf-label">Indice prix consommation</label>
+                <input class="pf-input" type="number" step="0.01" name="cons.price.idx" value="92.89">
+              </div>
+
+              <div>
+                <label class="pf-label">Taux de variation de l'emploi</label>
+                <input class="pf-input" type="number" step="0.1" name="emp.var.rate" value="-1.8">
+              </div>
+              <div>
+                <label class="pf-label">Contacts avant cette campagne</label>
+                <input class="pf-input" type="number" step="1" name="previous" value="2">
+              </div>
+
+            </div>
+
+            <div style="display:flex; gap:.6rem; margin-top:1.25rem;">
+              <button type="button" class="btn-predict" onclick="predictBank()">
+                Predire la souscription
+              </button>
+              <button type="button" class="btn-secondary" onclick="fillBankExample('B')">
+                Exemple defavorable
+              </button>
+              <button type="button" class="btn-secondary" onclick="fillBankExample('A')">
+                Exemple favorable
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Resultat -->
+      <div class="card" id="bank-result-card">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Resultat de la prediction</div>
+            <div class="card-desc">Calcule par le reseau Top-10 entraine</div>
+          </div>
+        </div>
+        <div class="card-body" id="bank-result-body">
+          <p style="font-size:.85rem; color:var(--gray-500);">
+            Remplissez le formulaire puis cliquez sur "Predire la souscription".
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SOUS-PARTIE B : FASHION MNIST                                 -->
+  <!-- ============================================================ -->
+  <div id="predsection-fashion" style="display:none;">
+
+    <div class="alert alert-green" style="margin-bottom:1.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        Dessinez un vetement (silhouette simple, trait blanc sur fond noir, comme les images
+        Fashion MNIST) puis cliquez sur "Predire la classe". Le serveur charge le meilleur modele
+        sauvegarde (<code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">fashion_mnist_best.keras</code>)
+        et classe le dessin parmi les 10 categories.
+      </div>
+    </div>
+
+    <!-- Bandeau metriques -->
+    {% if metrics_fashion %}
+    <div class="stat-row">
+      <div class="stat-chip">
+        <div class="stat-label">Meilleur modele</div>
+        <div class="stat-value" style="font-size:1rem;">{{ metrics_fashion.best_model }}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Accuracy (test)</div>
+        <div class="stat-value">{{ "%.1f"|format(metrics_fashion.accuracy * 100) }}%</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Loss</div>
+        <div class="stat-value">{{ "%.3f"|format(metrics_fashion.loss) }}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-label">Images test</div>
+        <div class="stat-value">{{ "{:,}".format(metrics_fashion.n_test) }}</div>
+      </div>
+    </div>
+    {% if metrics_fashion.all_models %}
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Architecture</th><th>Accuracy</th><th>Loss</th></tr>
+          </thead>
+          <tbody>
+            {% for m in metrics_fashion.all_models|sort(attribute='accuracy', reverse=true) %}
+            <tr {% if m.model == metrics_fashion.best_model %}style="background:var(--green-pale);"{% endif %}>
+              <td><strong>{{ m.model }}</strong>{% if m.model == metrics_fashion.best_model %} <span class="badge-best">Meilleur</span>{% endif %}</td>
+              <td class="mono">{{ "%.2f"|format(m.accuracy * 100) }}%</td>
+              <td class="mono">{{ "%.4f"|format(m.loss) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warn" style="margin-bottom:1.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      <div>
+        <strong>Metriques non disponibles.</strong> Fichier <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">metrics_fashion.json</code>
+        introuvable dans <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">outputs_tp2/</code>.
+        Ajoutez la cellule d'export fournie a la fin de la section 20 du notebook, puis re-executez-la.
+      </div>
+    </div>
+    {% endif %}
+
+    <div style="display:grid; grid-template-columns: .8fr 1.2fr; gap:1.5rem; align-items:start;">
+
+      <!-- Canvas -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Zone de dessin (28x28)</div>
+            <div class="card-desc">Dessinez avec la souris ou le doigt</div>
+          </div>
+        </div>
+        <div class="card-body" style="text-align:center;">
+          <canvas id="draw-canvas" width="280" height="280"
+                  style="border:2px solid var(--gray-100); border-radius:var(--radius-sm); background:#000; cursor:crosshair; touch-action:none;"></canvas>
+          <div style="display:flex; gap:.6rem; margin-top:1rem; justify-content:center;">
+            <button type="button" class="btn-predict" onclick="predictFashion()">
+              Predire la classe
+            </button>
+            <button type="button" class="btn-secondary" onclick="clearCanvas()">
+              Effacer
+            </button>
+          </div>
+          <p style="font-size:.74rem; color:var(--gray-500); margin-top:.75rem;">
+            Astuce : tracez une forme simple et centree (ex. un triangle pour une robe, un
+            rectangle pour un sac, deux jambes pour un pantalon) — le modele a ete entraine
+            sur des silhouettes 28x28 a basse resolution.
+          </p>
+        </div>
+      </div>
+
+      <!-- Resultat -->
+      <div class="card" id="fashion-result-card">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Resultat de la prediction</div>
+            <div class="card-desc">Classe predite + top-3 des probabilites</div>
+          </div>
+        </div>
+        <div class="card-body" id="fashion-result-body">
+          <p style="font-size:.85rem; color:var(--gray-500);">
+            Dessinez un vetement puis cliquez sur "Predire la classe".
+          </p>
+        </div>
+
+        <div class="card-body" style="border-top:1px solid var(--gray-100); padding-top:1rem;">
+          <div class="card-section-label" style="margin-bottom:.5rem;">10 categories possibles</div>
+          <div style="display:flex; flex-wrap:wrap; gap:.4rem;">
+            {% for label in fashion_classes %}
+            <span style="font-size:.74rem; background:var(--green-pale); color:var(--green-dark); padding:.2rem .55rem; border-radius:5px; border:1px solid var(--green-light); font-family:'JetBrains Mono',monospace;">{{ label }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% block extra_css %}
+<style>
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  padding: .5rem 1rem; font-size: .85rem; font-weight: 500;
+  color: var(--gray-500); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: var(--transition); border-bottom: 2px solid transparent;
+}
+.tab-btn:hover { color: var(--green-dark); }
+.tab-btn.active { color: var(--green-dark); border-bottom-color: var(--green-mid); font-weight: 600; }
+
+.pf-label {
+  display:block; font-size:.74rem; font-weight:600; color:var(--gray-700);
+  margin-bottom:.3rem;
+}
+.pf-input {
+  width:100%; padding:.5rem .65rem; border:1px solid var(--gray-100);
+  border-radius:var(--radius-sm); font-size:.85rem; font-family:'JetBrains Mono',monospace;
+  transition: var(--transition);
+}
+.pf-input:focus { outline:none; border-color:var(--green-mid); box-shadow:0 0 0 3px var(--green-pale); }
+
+.btn-predict {
+  background: var(--green-mid); color:#fff; border:none; padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; cursor:pointer;
+  transition: var(--transition);
+}
+.btn-predict:hover { background: var(--green-dark); }
+.btn-predict:disabled { opacity:.6; cursor:wait; }
+
+.btn-secondary {
+  background: var(--gray-50); color:var(--gray-700); border:1px solid var(--gray-100);
+  padding:.65rem 1rem; border-radius:var(--radius-sm); font-size:.8rem; font-weight:500; cursor:pointer;
+  transition: var(--transition);
+}
+.btn-secondary:hover { background:var(--gray-100); }
+
+.result-box-yes {
+  padding:1rem; background:var(--green-pale); border-radius:var(--radius-sm);
+  color:var(--green-dark); font-weight:600; font-size:.95rem;
+}
+.result-box-no {
+  padding:1rem; background:#fdeaea; border-radius:var(--radius-sm);
+  color:#c0392b; font-weight:600; font-size:.95rem;
+}
+.proba-bar-track {
+  width:100%; height:10px; background:var(--gray-100); border-radius:5px; overflow:hidden; margin-top:.5rem;
+}
+.proba-bar-fill {
+  height:100%; background: var(--green-mid); border-radius:5px; transition: width .4s ease;
+}
+.error-box {
+  padding:.85rem 1rem; background:#fdeaea; color:#c0392b; border-radius:var(--radius-sm);
+  font-size:.82rem; line-height:1.6;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Onglets ────────────────────────────────────────────────────
+function showPredTab(name) {
+  ['bank','fashion'].forEach(t => {
+    document.getElementById('predsection-' + t).style.display = (t === name) ? 'block' : 'none';
+    document.getElementById('predtab-' + t).classList.toggle('active', t === name);
+  });
+}
+
+// ── Exemples pre-remplis ──────────────────────────────────────
+const BANK_EXAMPLES = {
+  A: { duration: 520, euribor3m: 0.65, 'nr.employed': 5099.1, age: 41, campaign: 1,
+       pdays: 3, 'cons.conf.idx': -36.1, 'cons.price.idx': 92.89, 'emp.var.rate': -1.8, previous: 2 },
+  B: { duration: 95, euribor3m: 4.86, 'nr.employed': 5228.1, age: 35, campaign: 7,
+       pdays: 999, 'cons.conf.idx': -46.2, 'cons.price.idx': 93.99, 'emp.var.rate': 1.4, previous: 0 },
+};
+function fillBankExample(key) {
+  const ex = BANK_EXAMPLES[key];
+  const form = document.getElementById('bank-form');
+  Object.entries(ex).forEach(([name, val]) => {
+    const el = form.querySelector(`[name="${CSS.escape(name)}"]`);
+    if (el) el.value = val;
+  });
+}
+
+// ── Prediction Bank Telemarketing ─────────────────────────────
+async function predictBank() {
+  const form = document.getElementById('bank-form');
+  const data = {};
+  new FormData(form).forEach((val, key) => { data[key] = val; });
+
+  const resultBody = document.getElementById('bank-result-body');
+  resultBody.innerHTML = '<p style="font-size:.85rem; color:var(--gray-500);">Calcul en cours...</p>';
+
+  try {
+    const res = await fetch('/api/predict/bank', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+
+    if (!res.ok || json.error) {
+      resultBody.innerHTML = `<div class="error-box">${json.error || 'Erreur inconnue.'}</div>`;
+      return;
+    }
+
+    const isYes = json.prediction === 'yes';
+    const pct = Math.round(json.probability * 100);
+    resultBody.innerHTML = `
+      <div class="${isYes ? 'result-box-yes' : 'result-box-no'}">
+        ${json.prediction_human}
+      </div>
+      <div style="margin-top:1rem; font-size:.8rem; color:var(--gray-700);">
+        Probabilite de souscription : <strong>${pct}%</strong>
+        <div class="proba-bar-track"><div class="proba-bar-fill" style="width:${pct}%;"></div></div>
+      </div>
+    `;
+  } catch (err) {
+    resultBody.innerHTML = `<div class="error-box">Erreur de connexion au serveur : ${err}</div>`;
+  }
+}
+
+// ── Canvas de dessin Fashion MNIST ────────────────────────────
+const canvas = document.getElementById('draw-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function initCanvas() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+initCanvas();
+
+function getPos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+  const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+  return {
+    x: (clientX - rect.left) * (canvas.width / rect.width),
+    y: (clientY - rect.top) * (canvas.height / rect.height),
+  };
+}
+
+function startDraw(evt) {
+  drawing = true;
+  const p = getPos(evt);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  evt.preventDefault();
+}
+function moveDraw(evt) {
+  if (!drawing) return;
+  const p = getPos(evt);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  evt.preventDefault();
+}
+function endDraw(evt) {
+  drawing = false;
+  if (evt) evt.preventDefault();
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', moveDraw);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+canvas.addEventListener('touchstart', startDraw, { passive: false });
+canvas.addEventListener('touchmove', moveDraw, { passive: false });
+canvas.addEventListener('touchend', endDraw, { passive: false });
+
+function clearCanvas() {
+  initCanvas();
+  document.getElementById('fashion-result-body').innerHTML =
+    '<p style="font-size:.85rem; color:var(--gray-500);">Dessinez un vetement puis cliquez sur "Predire la classe".</p>';
+}
+
+function canvasTo28x28() {
+  const tmp = document.createElement('canvas');
+  tmp.width = 28; tmp.height = 28;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(canvas, 0, 0, 28, 28);
+  const imgData = tctx.getImageData(0, 0, 28, 28).data;
+  const pixels = [];
+  for (let i = 0; i < imgData.length; i += 4) {
+    // niveaux de gris a partir du canal rouge (trait blanc sur fond noir)
+    pixels.push(imgData[i] / 255);
+  }
+  return pixels;
+}
+
+async function predictFashion() {
+  const pixels = canvasTo28x28();
+  const resultBody = document.getElementById('fashion-result-body');
+  resultBody.innerHTML = '<p style="font-size:.85rem; color:var(--gray-500);">Calcul en cours...</p>';
+
+  try {
+    const res = await fetch('/api/predict/fashion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pixels }),
+    });
+    const json = await res.json();
+
+    if (!res.ok || json.error) {
+      resultBody.innerHTML = `<div class="error-box">${json.error || 'Erreur inconnue.'}</div>`;
+      return;
+    }
+
+    const pct = Math.round(json.confidence * 100);
+    let top3Html = json.top3.map(t => `
+      <div style="display:flex; justify-content:space-between; font-size:.78rem; margin-top:.3rem;">
+        <span>${t.label}</span>
+        <span class="mono">${Math.round(t.proba * 100)}%</span>
+      </div>
+    `).join('');
+
+    resultBody.innerHTML = `
+      <div class="result-box-yes">
+        Classe predite : ${json.prediction}
+      </div>
+      <div style="margin-top:.75rem; font-size:.8rem; color:var(--gray-700);">
+        Confiance : <strong>${pct}%</strong>
+        <div class="proba-bar-track"><div class="proba-bar-fill" style="width:${pct}%;"></div></div>
+      </div>
+      <div style="margin-top:.85rem;">
+        <div class="card-section-label">Top 3 probabilites</div>
+        ${top3Html}
+      </div>
+      <div style="margin-top:.75rem; font-size:.72rem; color:var(--gray-500);">
+        Modele utilise : ${json.model_used}
+      </div>
+    `;
+  } catch (err) {
+    resultBody.innerHTML = `<div class="error-box">Erreur de connexion au serveur : ${err}</div>`;
+  }
+}
+</script>
+{% endblock %}
+
+{% endblock %}

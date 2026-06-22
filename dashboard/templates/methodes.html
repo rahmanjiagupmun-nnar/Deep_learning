@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% block title %}Methodologie — IA2 TP Deep Learning{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-eyebrow">Documentation Technique</div>
+    <h1 class="hero-title">Methodologie & Concepts</h1>
+    <p class="hero-subtitle">
+      Explication detaillee de chaque algorithme utilise, des choix methodologiques et des principes
+      theoriques sous-jacents aux resultats presentes dans ce TP.
+    </p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <!-- Validation croisee -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Validation Croisee & Selection de Modele</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Stratified K-Fold Cross-Validation (k=5)</div>
+          <div class="card-desc">Methode de selection des hyperparametres utilisee tout au long du TP</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.85rem; color:var(--gray-700); line-height:1.75;">
+        <p>La validation croisee stratifiee divise le jeu d'entrainement en <strong>5 partitions (folds)</strong> en preservant
+        les proportions de classes dans chaque fold. Pour chaque combinaison d'hyperparametres :</p>
+        <ul style="margin:.6rem 0 .6rem 1.2rem; display:flex; flex-direction:column; gap:.25rem;">
+          <li>4 folds servent a l'entrainement, 1 fold a la validation</li>
+          <li>L'operation est repetee 5 fois en changeant le fold de validation</li>
+          <li>Le score final est la moyenne des 5 scores (+ ecart-type)</li>
+        </ul>
+        <p>Cette approche evite le sur-ajustement aux donnees de test et donne une estimation
+        non biaisee de la performance de generalisation. <strong>GridSearchCV</strong> automatise
+        ce processus sur une grille de valeurs d'hyperparametres.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Choix des Metriques</div>
+          <div class="card-desc">Justification selon le desequilibre de classes</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-700); line-height:1.7;">
+        <p style="margin-bottom:.5rem;"><strong>Pourquoi le F1-Score ?</strong></p>
+        <p>Avec ~76% de classe "&lt;=50K" dans Census et ~89% de "no" dans Bank Telemarketing,
+        un classifieur qui predit toujours la classe majoritaire atteint une accuracy elevee
+        sans rien apprendre.</p>
+        <p style="margin-top:.5rem;">Le F1-Score est la moyenne harmonique de la precision et du rappel,
+        particulierement adapte aux classes desequilibrees. L'AUC-ROC mesure la capacite
+        discriminante globale independamment du seuil.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Methodes ensemble -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Methodes d'Ensemble</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; margin-bottom:2rem;">
+    {% set methods = [
+      ('Bagging', 'Bootstrap Aggregating', [
+        'Tire B sous-echantillons avec remise',
+        'Entraine un arbre sur chaque sous-echantillon',
+        'Agregation par vote majoritaire',
+        'Reduit la variance, preserve le biais',
+        'Parametre cle : B (nombre d\'arbres)'
+      ], 'RandomForestClassifier avec max_features=n_features'),
+      ('Random Forest', 'Forets Aleatoires', [
+        'Extension du Bagging avec sous-espace aleatoire',
+        'A chaque noeud : seulement p variables candidates',
+        'Decorrelation des arbres : reduction variance accrue',
+        'OOB Score : evaluation sans jeu de test separe',
+        'Parametres cles : n_estimators (B), max_features (p)'
+      ], 'Generalement sqrt(n_features) pour la classification'),
+      ('Gradient Boosting', 'Boosting Sequentiel', [
+        'Arbres construits sequentiellement',
+        'Chaque arbre corrige les erreurs du precedent',
+        'Minimise une fonction de perte par descente de gradient',
+        'Early stopping via n_iter_no_change',
+        'Parametres : learning_rate, max_depth, subsample'
+      ], 'AdaBoost : poids sur les erreurs, pas de gradient')
+    ] %}
+    {% for name, subtitle, points, note in methods %}
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">{{ name }}</div>
+          <div class="card-desc">{{ subtitle }}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul style="font-size:.82rem; color:var(--gray-700); line-height:1.7; padding-left:1rem; display:flex; flex-direction:column; gap:.2rem;">
+          {% for point in points %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+        <div style="margin-top:.75rem; padding:.5rem .75rem; background:var(--green-pale); border-radius:var(--radius-sm); font-size:.78rem; color:var(--green-dark);">
+          {{ note }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Reseaux de neurones -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Architectures de Reseaux de Neurones</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><circle cx="3" cy="6" r="2"/><circle cx="21" cy="6" r="2"/><circle cx="3" cy="18" r="2"/><circle cx="21" cy="18" r="2"/>
+            <path d="M5 6h4M15 6h4M5 18h4M15 18h4M9 10.5L12 9M15 10.5L12 9M9 13.5L12 15M15 13.5L12 15"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Reseau Feedforward (MLP)</div>
+          <div class="card-desc">Architecture sequentielle pour donnees tabulaires</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-700); line-height:1.7;">
+        <p style="margin-bottom:.5rem;"><strong>Reseau Simple (Bank Telemarketing) :</strong></p>
+        <code style="display:block; background:var(--gray-50); padding:.6rem; border-radius:var(--radius-sm); font-size:.78rem; line-height:1.6; margin-bottom:.75rem;">
+          Input → Dense(64, relu) → Dense(32, relu) → Dense(1, sigmoid)
+        </code>
+        <p style="margin-bottom:.5rem;"><strong>Reseau Profond Optimise :</strong></p>
+        <code style="display:block; background:var(--gray-50); padding:.6rem; border-radius:var(--radius-sm); font-size:.78rem; line-height:1.6;">
+          Input → Dense(256)+BN+Dropout(0.4)<br>
+          → Dense(128)+BN+Dropout(0.3)<br>
+          → Dense(64)+BN+Dropout(0.3)<br>
+          → Dense(32)+BN+Dropout(0.2)<br>
+          → Dense(16) → Dense(1, sigmoid)
+        </code>
+        <p style="margin-top:.75rem; font-size:.8rem; color:var(--gray-500);">
+          BatchNormalization stabilise l'entrainement. Dropout regularise en desactivant aleatoirement des neurones.
+          L2 regularisation penalise les poids eleves.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">CNN pour Fashion MNIST</div>
+          <div class="card-desc">Architectures convolutionnelles pour la vision</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-700); line-height:1.7;">
+        <table style="width:100%; border-collapse:collapse; font-size:.8rem;">
+          <tr style="border-bottom:1px solid var(--gray-100);">
+            <td style="padding:.3rem 0; font-weight:600;">LeNet+</td>
+            <td style="color:var(--gray-500);">2xConv2D → MaxPool → Flatten → Dense</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--gray-100);">
+            <td style="padding:.3rem 0; font-weight:600;">VGGNet</td>
+            <td style="color:var(--gray-500);">4xConv2D(3x3) empiles → FC → Softmax</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--gray-100);">
+            <td style="padding:.3rem 0; font-weight:600;">ResNet Custom</td>
+            <td style="color:var(--gray-500);">Blocs residuels + GAP + Mixed Precision</td>
+          </tr>
+          <tr>
+            <td style="padding:.3rem 0; font-weight:600;">MLP (ref.)</td>
+            <td style="color:var(--gray-500);">Flatten → Dense → Dense → Softmax</td>
+          </tr>
+        </table>
+        <div style="margin-top:.75rem; padding:.5rem .75rem; background:var(--green-pale); border-radius:var(--radius-sm); font-size:.78rem; color:var(--green-dark);">
+          <strong>Avantage CNN :</strong> les filtres de convolution apprennent automatiquement
+          les caracteristiques visuelles locales (bords, textures) sans feature engineering manuel.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Courbes ROC -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Evaluation — Courbes ROC & AUC</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; font-size:.85rem; color:var(--gray-700); line-height:1.75;">
+        <div>
+          <p style="font-weight:600; margin-bottom:.4rem;">Principe de la courbe ROC :</p>
+          <p>La courbe ROC trace le <strong>Taux de Vrais Positifs (TPR = Rappel)</strong> en fonction du
+          <strong>Taux de Faux Positifs (FPR)</strong> pour chaque seuil de classification possible.</p>
+          <ul style="margin:.5rem 0 .5rem 1.2rem;">
+            <li>TPR = TP / (TP + FN) — proportion de positifs correctement identifies</li>
+            <li>FPR = FP / (FP + TN) — proportion de negatifs incorrectement identifies</li>
+            <li>Un classifieur parfait : point (0, 1) — coin superieur gauche</li>
+            <li>Un classifieur aleatoire : diagonale (AUC = 0.5)</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-weight:600; margin-bottom:.4rem;">Interpretation de l'AUC :</p>
+          <div style="display:flex; flex-direction:column; gap:.4rem;">
+            {% for range, color, interp in [
+              ('0.90 - 1.00', 'var(--green-mid)', 'Excellent'),
+              ('0.80 - 0.90', 'var(--green-bright)', 'Bon'),
+              ('0.70 - 0.80', 'var(--accent-gold)', 'Acceptable'),
+              ('0.60 - 0.70', '#e67e22', 'Mediocre'),
+              ('0.50 - 0.60', '#e74c3c', 'Mauvais (aleatoire)'),
+            ] %}
+            <div style="display:flex; align-items:center; gap:.6rem;">
+              <span style="width:12px; height:12px; border-radius:3px; background:{{ color }}; flex-shrink:0;"></span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:.8rem;">{{ range }}</span>
+              <span style="color:var(--gray-500); font-size:.8rem;">— {{ interp }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          <p style="margin-top:.6rem; font-size:.8rem; color:var(--gray-500);">
+            Random Forest et Gradient Boosting atteignent generalement AUC > 0.92 sur Census Income,
+            ce qui traduit une excellente capacite discriminante.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Importance variables -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Importance des Variables — Selection des Top-10</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+    <div class="card">
+      <div class="card-body" style="font-size:.85rem; color:var(--gray-700); line-height:1.75;">
+        <p style="font-weight:600; margin-bottom:.5rem;">Comment est calcule le score d'importance ?</p>
+        <p>Pour chaque arbre de la foret, on mesure la <strong>reduction totale de l'impurete Gini</strong>
+        apportee par chaque variable sur l'ensemble des noeuds ou elle est utilisee.
+        L'importance finale est la moyenne de ces reductions sur tous les arbres, normalisee pour sommer a 1.</p>
+        <p style="margin-top:.5rem; padding:.5rem .75rem; background:var(--green-pale); border-radius:var(--radius-sm); font-size:.8rem; color:var(--green-dark);">
+          Une importance elevee ne signifie pas necessairement causalite. Elle indique que la variable
+          est souvent choisie pour separer les classes de maniere efficace.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="font-size:.85rem; color:var(--gray-700); line-height:1.75;">
+        <p style="font-weight:600; margin-bottom:.5rem;">Top variables — Census Income (selon Random Forest)</p>
+        {% for var in ['capital-gain', 'education-num', 'age', 'hours-per-week', 'capital-loss', 'fnlwgt', 'marital-status_Married', 'occupation_Exec', 'relationship_Wife', 'sex_Male'] %}
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.25rem;">
+          <span style="font-size:.75rem; font-family:'JetBrains Mono',monospace; color:var(--gray-700); width:200px;">{{ var }}</span>
+          <div class="progress-bar" style="flex:1;">
+            <div class="progress-fill" style="width:{{ [100, 85, 72, 60, 45, 40, 35, 28, 22, 18][loop.index0] }}%;"></div>
+          </div>
+        </div>
+        {% endfor %}
+        <p style="font-size:.78rem; color:var(--gray-500); margin-top:.5rem;">
+          Les top-10 sont utilisees pour le modele de deploiement (telemarketing.pkl / bank-tel.pkl).
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Partie 2 — Reseaux de Neurones & Deep Learning{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-eyebrow">Partie 2 — Reseaux de Neurones & Apprentissage Profond</div>
+    <h1 class="hero-title">ANN Bank Telemarketing + Fashion MNIST Deep Learning</h1>
+    <p class="hero-subtitle">
+      Construction de reseaux de neurones feedforward pour la prediction bancaire, puis exploration
+      d'architectures profondes (MLP, LeNet, VGGNet, ResNet) sur Fashion MNIST.
+    </p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  {% if not has_data %}
+  <div class="alert alert-warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <div>
+      <strong>Donnees non disponibles.</strong>
+      Aucune figure trouvee dans le dossier <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">outputs_tp2/</code>.
+      Executez d'abord le notebook <code style="background:rgba(0,0,0,.08);padding:.1rem .4rem;border-radius:3px;">part2__2_.ipynb</code>
+      pour generer les figures.
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Contexte -->
+  <div class="alert alert-green" style="margin-bottom:2rem;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div>
+      <strong>Deux sous-parties, conformement au sujet :</strong> (2A) Reseaux de neurones — un
+      perceptron multicouche (feedforward) entraine sur les donnees Bank Telemarketing pour predire
+      la souscription d'un produit bancaire. (2B) Apprentissage profond — comparaison de plusieurs
+      architectures profondes (MLP, CNN LeNet+, VGGNet-like, ResNet) sur Fashion MNIST.
+    </div>
+  </div>
+
+  <!-- Onglets de sous-partie -->
+  <div style="display:flex; gap:.5rem; margin-bottom:2rem; border-bottom:2px solid var(--gray-100); padding-bottom:.5rem;" id="tab-bar">
+    <button class="tab-btn active" onclick="showTab('bank')" id="tab-bank">
+      Partie 2A — Reseaux de Neurones (Bank Telemarketing)
+    </button>
+    <button class="tab-btn" onclick="showTab('mnist')" id="tab-mnist">
+      Partie 2B — Apprentissage Profond (Fashion MNIST)
+    </button>
+    <button class="tab-btn" onclick="showTab('all')" id="tab-all">
+      Toutes les figures
+    </button>
+  </div>
+
+  <!-- Stats rapides -->
+  <div class="stat-row">
+    <div class="stat-chip">
+      <div class="stat-label">Reseau simple</div>
+      <div class="stat-value">3</div>
+      <div class="stat-sub">couches denses</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Reseau profond</div>
+      <div class="stat-value">6</div>
+      <div class="stat-sub">couches (+ BN + Dropout)</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Top variables</div>
+      <div class="stat-value">10</div>
+      <div class="stat-sub">selectionnees pour deploiement</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Architectures CNN</div>
+      <div class="stat-value">4</div>
+      <div class="stat-sub">MLP / LeNet / VGG / ResNet</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-label">Figures generees</div>
+      <div class="stat-value">{{ images|length }}</div>
+      <div class="stat-sub">visualisations</div>
+    </div>
+  </div>
+
+  <!-- Tableau Architectures Fashion MNIST -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Architectures CNN — Fashion MNIST</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Architecture</th>
+            <th>Couches</th>
+            <th>Accuracy (test)</th>
+            <th>Caracteristique principale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MLP (Fully Connected)</strong></td>
+            <td class="mono">Flatten + Dense</td>
+            <td class="mono">a completer</td>
+            <td>Reference, pas de convolution</td>
+          </tr>
+          <tr>
+            <td><strong>CNN LeNet+</strong></td>
+            <td class="mono">2 Conv + 2 Dense</td>
+            <td class="mono">a completer</td>
+            <td>Architecture originelle adaptee</td>
+          </tr>
+          <tr>
+            <td><strong>VGGNet-like</strong></td>
+            <td class="mono">4 Conv + 2 Dense</td>
+            <td class="mono">a completer</td>
+            <td>Filtres 3x3 empiles, profondeur</td>
+          </tr>
+          <tr>
+            <td><strong>ResNet Custom</strong></td>
+            <td class="mono">Blocs residuels + GAP</td>
+            <td class="mono">a completer</td>
+            <td>Skip connections, mixed precision</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:.78rem; color:var(--gray-500); margin-top:.75rem;">
+        Completez la colonne Accuracy avec les valeurs exactes affichees a la fin du notebook
+        (section "COMPARAISON — MODELES FASHION MNIST"), puis surlignez la ligne du meilleur modele.
+      </p>
+    </div>
+  </div>
+
+  <!-- Figures Bank Telemarketing -->
+  <div id="section-bank">
+    {% set bank_images = images | selectattr('souspartie', 'equalto', 'bank') | list %}
+    {% set bank_sections = ['Exploration', 'Comparaison', 'Evaluation', 'Reseaux de Neurones', 'Interpretation'] %}
+    {% for section_name in bank_sections %}
+      {% set section_images = bank_images | selectattr('section', 'equalto', section_name) | list %}
+      {% if section_images %}
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <span class="section-title">{{ section_name }}</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="figure-grid" style="margin-bottom:1rem;">
+        {% for img in section_images %}
+        <div class="figure-card">
+          <img src="data:image/png;base64,{{ img.data }}" alt="{{ img.title }}" loading="lazy"
+               onclick="openLightbox(this.src, '{{ img.title }}')" />
+          <div class="fig-info">
+            <div class="card-section-label">{{ img.section }}</div>
+            <div class="fig-title">{{ img.title }}</div>
+            <div class="fig-desc">{{ img.description }}</div>
+          </div>
+          <div class="fig-footer">
+            <span class="fig-filename">{{ img.name }}</span>
+            <button class="btn-expand" onclick="openLightbox('data:image/png;base64,{{ img.data }}', '{{ img.title }}')">Agrandir</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="alert alert-info" style="margin-top:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>
+        Le modele Top-10 variables ci-dessus est celui deploye pour la prediction sur de nouvelles
+        donnees. Voir la page <a href="/predictions" style="font-weight:600;">Predictions</a> pour
+        des exemples concrets et le code de deploiement.
+      </div>
+    </div>
+  </div>
+
+  <!-- Figures Deep Learning -->
+  <div id="section-mnist" style="display:none;">
+    {% set dl_section_images = images | selectattr('souspartie', 'equalto', 'mnist') | list %}
+    {% if dl_section_images %}
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <span class="section-title">Deep Learning — Fashion MNIST</span>
+      <div class="section-line"></div>
+    </div>
+
+    <!-- Description des classes Fashion MNIST -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">10 Categories Fashion MNIST</div>
+          <div class="card-desc">Chaque image 28x28 appartient a l'une de ces categories</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+          {% for label in ['0-T-shirt/top', '1-Trouser', '2-Pullover', '3-Dress', '4-Coat', '5-Sandal', '6-Shirt', '7-Sneaker', '8-Bag', '9-Ankle boot'] %}
+          <span style="font-size:.78rem; background:var(--green-pale); color:var(--green-dark); padding:.25rem .65rem; border-radius:5px; border:1px solid var(--green-light); font-family:'JetBrains Mono',monospace;">{{ label }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="figure-grid">
+      {% for img in dl_section_images %}
+      <div class="figure-card">
+        <img src="data:image/png;base64,{{ img.data }}" alt="{{ img.title }}" loading="lazy"
+             onclick="openLightbox(this.src, '{{ img.title }}')" />
+        <div class="fig-info">
+          <div class="card-section-label">{{ img.section }}</div>
+          <div class="fig-title">{{ img.title }}</div>
+          <div class="fig-desc">{{ img.description }}</div>
+        </div>
+        <div class="fig-footer">
+          <span class="fig-filename">{{ img.name }}</span>
+          <button class="btn-expand" onclick="openLightbox('data:image/png;base64,{{ img.data }}', '{{ img.title }}')">Agrandir</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>Les figures Fashion MNIST seront visibles ici apres execution du notebook. La section Deep Learning est labellisee "Deep Learning" dans les metadonnees.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Toutes les figures -->
+  <div id="section-all" style="display:none;">
+    {% set sections_all = images | map(attribute='section') | unique | list %}
+    {% for section_name in sections_all %}
+    {% set section_images = images | selectattr('section', 'equalto', section_name) | list %}
+    {% if section_images %}
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <span class="section-title">{{ section_name }}</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="figure-grid" style="margin-bottom:1rem;">
+      {% for img in section_images %}
+      <div class="figure-card">
+        <img src="data:image/png;base64,{{ img.data }}" alt="{{ img.title }}" loading="lazy"
+             onclick="openLightbox(this.src, '{{ img.title }}')" />
+        <div class="fig-info">
+          <div class="card-section-label">{{ img.section }}</div>
+          <div class="fig-title">{{ img.title }}</div>
+          <div class="fig-desc">{{ img.description }}</div>
+        </div>
+        <div class="fig-footer">
+          <span class="fig-filename">{{ img.name }}</span>
+          <button class="btn-expand" onclick="openLightbox('data:image/png;base64,{{ img.data }}', '{{ img.title }}')">Agrandir</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% block extra_css %}
+<style>
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  padding: .5rem 1rem; font-size: .85rem; font-weight: 500;
+  color: var(--gray-500); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: var(--transition); border-bottom: 2px solid transparent;
+}
+.tab-btn:hover { color: var(--green-dark); }
+.tab-btn.active { color: var(--green-dark); border-bottom-color: var(--green-mid); font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name) {
+  ['bank','mnist','all'].forEach(t => {
+    document.getElementById('section-' + t).style.display = (t === name) ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  });
+}
+</script>
+{% endblock %}
+
+{% endblock %}

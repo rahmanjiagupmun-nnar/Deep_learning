@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}IA2 - Tableau de Bord Principal{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="hero-eyebrow">Intelligence Artificielle 2 — DIPES 2 — 2025-2026</div>
+    <h1 class="hero-title">Tableau de Bord — TP Deep Learning</h1>
+    <p class="hero-subtitle">
+      Visualisation interactive des resultats du TP sur les Reseaux de Neurones et l'Apprentissage Profond.
+      Deux parties couvrant la classification classique (Census Income) et le Deep Learning (Bank Telemarketing + Fashion MNIST).
+    </p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <!-- Contexte pedagogique -->
+  <div class="alert alert-green" style="margin-bottom:2rem;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div>
+      <strong>Objectif du TP :</strong> Acquerir et renforcer les competences pratiques en apprentissage automatique et apprentissage profond
+      sur des jeux de donnees classiques. Ce dashboard centralise et documente tous les resultats produits par les deux parties du code.
+    </div>
+  </div>
+
+  <!-- Cartes de navigation -->
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:1.25rem; margin-bottom:2.5rem;">
+
+    <!-- Partie 1 -->
+    <a href="/partie1" style="text-decoration:none;">
+      <div class="card" style="border-top: 4px solid var(--green-mid);">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Partie 1 — Classification (Census Income)</div>
+            <div class="card-desc">Methodes classiques, methodes d'ensemble, courbes ROC, importances des variables</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+            {% for tag in ['Arbre de Decision', 'Random Forest', 'Gradient Boosting', 'AdaBoost', 'KNN', 'Regression Logistique', 'Naive Bayes'] %}
+            <span style="font-size:.73rem; background:var(--green-pale); color:var(--green-dark); padding:.2rem .6rem; border-radius:4px; border:1px solid var(--green-light);">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div style="margin-top:1rem; display:flex; align-items:center; gap:.5rem;">
+            {% if tp1_available %}
+            <span style="font-size:.8rem; color:var(--green-mid); font-weight:600;">
+              {{ tp1_count }} figures disponibles
+            </span>
+            {% else %}
+            <span style="font-size:.8rem; color:#e67e22; font-weight:500;">En attente des fichiers outputs_tp1/</span>
+            {% endif %}
+            <span style="margin-left:auto; font-size:.82rem; color:var(--green-mid); font-weight:600;">Voir les resultats &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Partie 2 -->
+    <a href="/partie2" style="text-decoration:none;">
+      <div class="card" style="border-top: 4px solid var(--accent-gold);">
+        <div class="card-header">
+          <div class="card-icon" style="background:#fef9e7;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="2">
+              <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H4a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-1"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Partie 2 — Reseaux de Neurones & Deep Learning</div>
+            <div class="card-desc">Bank Telemarketing (ANN) + Fashion MNIST (CNN, VGG, ResNet)</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+            {% for tag in ['Reseau Simple', 'Reseau Profond', 'LeNet+', 'VGGNet', 'ResNet Custom', 'Fashion MNIST', 'Top-10 Variables'] %}
+            <span style="font-size:.73rem; background:#fef9e7; color:#7d6608; padding:.2rem .6rem; border-radius:4px; border:1px solid #f7dc6f;">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div style="margin-top:1rem; display:flex; align-items:center; gap:.5rem;">
+            {% if tp2_available %}
+            <span style="font-size:.8rem; color:var(--accent-gold); font-weight:600;">
+              {{ tp2_count }} figures disponibles
+            </span>
+            {% else %}
+            <span style="font-size:.8rem; color:#e67e22; font-weight:500;">En attente des fichiers outputs_tp2/</span>
+            {% endif %}
+            <span style="margin-left:auto; font-size:.82rem; color:var(--accent-gold); font-weight:600;">Voir les resultats &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Methodologie -->
+    <a href="/methodes" style="text-decoration:none;">
+      <div class="card" style="border-top: 4px solid #5dade2;">
+        <div class="card-header">
+          <div class="card-icon" style="background:#ebf5fb;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5dade2" stroke-width="2">
+              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Methodologie & Concepts</div>
+            <div class="card-desc">Explication detaillee de chaque algorithme et des choix methodologiques</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p style="font-size:.83rem; color:var(--gray-500); margin-bottom:.75rem;">
+            Comprendre les principes de validation croisee, d'importance des variables, des courbes ROC
+            et des architectures de reseaux de neurones utilisees dans ce TP.
+          </p>
+          <span style="font-size:.82rem; color:#5dade2; font-weight:600;">Lire la methodologie &rarr;</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Predictions -->
+    <a href="/predictions" style="text-decoration:none;">
+      <div class="card" style="border-top: 4px solid #a569bd;">
+        <div class="card-header">
+          <div class="card-icon" style="background:#f5eef8;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a569bd" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Predictions sur Donnees Reelles</div>
+            <div class="card-desc">Deploiement du modele optimal et exemples de prediction</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p style="font-size:.83rem; color:var(--gray-500); margin-bottom:.75rem;">
+            Utilisation du modele Top-10 variables sauvegarde (.keras + .pkl) pour predire la
+            souscription de nouveaux clients a partir de leurs caracteristiques.
+          </p>
+          <span style="font-size:.82rem; color:#a569bd; font-weight:600;">Voir les predictions &rarr;</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Contexte du jeu de donnees -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Jeux de donnees utilises</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:1.1rem; margin-bottom:2rem;">
+
+    <div class="card">
+      <div class="card-header">
+        <div style="flex:1">
+          <div class="card-section-label">Partie 1</div>
+          <div class="card-title">Census Income Dataset</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-500); line-height:1.7;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Instances</td><td style="text-align:right; font-family:monospace;">48 842</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Variables</td><td style="text-align:right; font-family:monospace;">14 (6 num., 8 cat.)</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Tache</td><td style="text-align:right;">Classification binaire</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Classes</td><td style="text-align:right;">&lt;=50K / &gt;50K</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Desequilibre</td><td style="text-align:right;">~76% / ~24%</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div style="flex:1">
+          <div class="card-section-label">Partie 2a</div>
+          <div class="card-title">Bank Telemarketing (bank-additional-full)</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-500); line-height:1.7;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Instances</td><td style="text-align:right; font-family:monospace;">41 188</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Variables</td><td style="text-align:right; font-family:monospace;">20 (7 num., 13 cat.)</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Tache</td><td style="text-align:right;">Classification binaire</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Classes</td><td style="text-align:right;">yes (souscrit) / no</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Desequilibre</td><td style="text-align:right;">~89% no / ~11% yes</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div style="flex:1">
+          <div class="card-section-label">Partie 2b</div>
+          <div class="card-title">Fashion MNIST</div>
+        </div>
+      </div>
+      <div class="card-body" style="font-size:.84rem; color:var(--gray-500); line-height:1.7;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Images</td><td style="text-align:right; font-family:monospace;">70 000</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Resolution</td><td style="text-align:right; font-family:monospace;">28 x 28 pixels</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Categories</td><td style="text-align:right; font-family:monospace;">10 classes</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Split</td><td style="text-align:right;">60 000 train / 10 000 test</td></tr>
+          <tr><td style="padding:.2rem 0; color:var(--gray-700); font-weight:500;">Type</td><td style="text-align:right;">Niveaux de gris</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pipeline methodologique -->
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <span class="section-title">Pipeline Methodologique</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:1rem; margin-bottom:2.5rem;">
+    {% set steps = [
+      ('1', 'Analyse Exploratoire', 'Distribution, correlations, nuages de points, statistiques descriptives'),
+      ('2', 'Pretraitement', 'Nettoyage, encodage one-hot, normalisation, split stratifie 80/20'),
+      ('3', 'Baseline', 'Classifieur constant (classe majoritaire) comme reference a battre'),
+      ('4', 'Modelisation', 'GridSearchCV, validation croisee, optimisation des hyperparametres'),
+      ('5', 'Evaluation', 'Matrices de confusion, courbes ROC, AUC, F1-Score, Precision, Rappel'),
+      ('6', 'Interpretation', 'Importance des variables, courbes d\'apprentissage, diagnostic biais/variance'),
+    ] %}
+    {% for num, title, desc in steps %}
+    <div style="background:var(--white); border:1px solid var(--gray-100); border-radius:var(--radius-md); padding:.9rem 1rem; box-shadow:var(--shadow-sm);">
+      <div style="font-size:1.4rem; font-weight:700; color:var(--green-light); line-height:1; margin-bottom:.4rem; font-family:'JetBrains Mono',monospace;">{{ num }}</div>
+      <div style="font-size:.87rem; font-weight:600; color:var(--gray-900); margin-bottom:.3rem;">{{ title }}</div>
+      <div style="font-size:.77rem; color:var(--gray-500); line-height:1.5;">{{ desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{
+  "best_model": "Reseau Top-10 variables (deploye)",
+  "accuracy": 0.9135,
+  "f1_score": 0.4724,
+  "precision": 0.7361,
+  "recall": 0.3478,
+  "auc": 0.9474,
+  "n_instances_total": 41188,
+  "n_instances_clean": 39258,
+  "n_features": 51,
+  "taux_souscription_pct": 11.27,
+  "top10_features": [
+    "duration",
+    "euribor3m",
+    "nr.employed",
+    "age",
+    "pdays",
+    "cons.conf.idx",
+    "poutcome_success",
+    "emp.var.rate",
+    "cons.price.idx",
+    "campaign"
+  ],
+  "all_models": [
+    {
+      "model": "Reseau Top-10 variables (deploye)",
+      "accuracy": 0.9135,
+      "f1_score": 0.4724,
+      "precision": 0.7361,
+      "recall": 0.3478
+    }
+  ],
+  "note": "Seul le modele final deploye (reseau Top-10) a pu etre re-evalue, car les modeles intermediaires (Random Forest, Gradient Boosting, Decision Tree, etc.) n'ont pas ete sauvegardes individuellement."
+}

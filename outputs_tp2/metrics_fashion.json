@@ -1,0 +1,47 @@
+{
+  "best_model": "best",
+  "accuracy": 0.9191,
+  "loss": 0.2218,
+  "n_classes": 10,
+  "class_names": [
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot"
+  ],
+  "n_train": 60000,
+  "n_test": 10000,
+  "all_models": [
+    {
+      "model": "best",
+      "accuracy": 0.9191,
+      "loss": 0.2218
+    },
+    {
+      "model": "resnet",
+      "accuracy": 0.8027,
+      "loss": 0.6284
+    },
+    {
+      "model": "vgg_like",
+      "accuracy": 0.9191,
+      "loss": 0.2218
+    },
+    {
+      "model": "cnn_lenet",
+      "accuracy": 0.9188,
+      "loss": 0.2198
+    },
+    {
+      "model": "mlp",
+      "accuracy": 0.8949,
+      "loss": 0.3134
+    }
+  ]
+}

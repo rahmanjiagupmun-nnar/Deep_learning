@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}IA2 - Deep Learning Dashboard{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root {
+      --green-deep:    #0a3d1f;
+      --green-dark:    #145a32;
+      --green-mid:     #1e8449;
+      --green-bright:  #27ae60;
+      --green-light:   #a9dfbf;
+      --green-pale:    #eafaf1;
+      --white:         #ffffff;
+      --off-white:     #f8fdf9;
+      --gray-50:       #f4f6f5;
+      --gray-100:      #e8edea;
+      --gray-300:      #b0c0b8;
+      --gray-500:      #6b8072;
+      --gray-700:      #334d3e;
+      --gray-900:      #1a2d23;
+      --accent-gold:   #d4a017;
+      --shadow-sm: 0 1px 3px rgba(10,61,31,.10);
+      --shadow-md: 0 4px 16px rgba(10,61,31,.12);
+      --shadow-lg: 0 8px 32px rgba(10,61,31,.16);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all .22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Reset ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--off-white);
+      color: var(--gray-700);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Navigation ───────────────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--green-deep);
+      border-bottom: 2px solid var(--green-mid);
+      padding: 0 2rem;
+      display: flex; align-items: center; gap: 0;
+      height: 58px;
+      box-shadow: var(--shadow-md);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .7rem;
+      text-decoration: none; margin-right: 2.5rem;
+    }
+    .nav-brand .brand-badge {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--green-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--white);
+      letter-spacing: -.5px;
+    }
+    .nav-brand span {
+      font-size: .95rem; font-weight: 600; color: var(--white);
+      letter-spacing: .3px;
+    }
+    .nav-links { display: flex; gap: .25rem; flex: 1; }
+    .nav-link {
+      color: var(--green-light); text-decoration: none;
+      padding: .45rem .9rem; border-radius: var(--radius-sm);
+      font-size: .85rem; font-weight: 500;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: var(--green-mid); color: var(--white);
+    }
+    .nav-badge {
+      margin-left: .4rem;
+      background: var(--green-mid); color: var(--white);
+      font-size: .68rem; font-weight: 600;
+      padding: .1rem .45rem; border-radius: 99px;
+    }
+    .nav-right {
+      margin-left: auto;
+      font-size: .75rem; color: var(--green-light); opacity: .7;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Page hero ─────────────────────────────────────────────── */
+    .page-hero {
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 55%, var(--green-mid) 100%);
+      padding: 3rem 2rem 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .page-hero-inner { position: relative; max-width: 1100px; margin: 0 auto; }
+    .hero-eyebrow {
+      font-size: .75rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--green-light);
+      margin-bottom: .6rem; opacity: .85;
+    }
+    .hero-title {
+      font-size: 2rem; font-weight: 700; color: var(--white);
+      line-height: 1.2; margin-bottom: .7rem;
+    }
+    .hero-subtitle {
+      font-size: 1rem; color: var(--green-light); opacity: .8;
+      max-width: 600px;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .main-content { padding: 2.5rem 2rem; max-width: 1200px; margin: 0 auto; }
+
+    /* ── Cards ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .card-header {
+      padding: 1.1rem 1.4rem .9rem;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: flex-start; gap: .85rem;
+    }
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-icon svg { width: 20px; height: 20px; color: var(--green-mid); }
+    .card-title { font-size: .95rem; font-weight: 600; color: var(--gray-900); }
+    .card-desc { font-size: .82rem; color: var(--gray-500); margin-top: .2rem; line-height: 1.5; }
+    .card-body { padding: 1.1rem 1.4rem; }
+    .card-section-label {
+      display: inline-block; font-size: .68rem; font-weight: 600;
+      letter-spacing: .8px; text-transform: uppercase;
+      color: var(--green-mid); background: var(--green-pale);
+      padding: .18rem .55rem; border-radius: 4px;
+      margin-bottom: .5rem;
+    }
+
+    /* ── Figure grid ───────────────────────────────────────────── */
+    .figure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+      gap: 1.5rem;
+    }
+    .figure-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .figure-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .figure-card img {
+      width: 100%; display: block;
+      background: var(--gray-50);
+      cursor: zoom-in;
+    }
+    .figure-card .fig-info { padding: 1rem 1.2rem; }
+    .figure-card .fig-title {
+      font-size: .93rem; font-weight: 600; color: var(--gray-900);
+      margin-bottom: .35rem;
+    }
+    .figure-card .fig-desc {
+      font-size: .8rem; color: var(--gray-500); line-height: 1.55;
+    }
+    .figure-card .fig-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .6rem 1.2rem;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-100);
+    }
+    .fig-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; color: var(--gray-500);
+    }
+    .btn-expand {
+      font-size: .76rem; font-weight: 500; color: var(--green-mid);
+      background: none; border: 1px solid var(--green-light);
+      border-radius: var(--radius-sm); padding: .25rem .65rem;
+      cursor: pointer; transition: var(--transition);
+    }
+    .btn-expand:hover { background: var(--green-pale); }
+
+    /* ── Section headers ───────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; gap: .75rem;
+      margin-bottom: 1.25rem; margin-top: 2rem;
+    }
+    .section-header:first-child { margin-top: 0; }
+    .section-line {
+      flex: 1; height: 1px; background: var(--gray-100);
+    }
+    .section-title {
+      font-size: .78rem; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--gray-500);
+      white-space: nowrap;
+    }
+    .section-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green-mid); flex-shrink: 0;
+    }
+
+    /* ── Stat chips ────────────────────────────────────────────── */
+    .stat-row {
+      display: flex; flex-wrap: wrap; gap: .85rem;
+      margin-bottom: 2rem;
+    }
+    .stat-chip {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-md);
+      padding: .9rem 1.3rem;
+      min-width: 160px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-chip .stat-label {
+      font-size: .75rem; font-weight: 500; color: var(--gray-500);
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .stat-chip .stat-value {
+      font-size: 1.55rem; font-weight: 700; color: var(--green-dark);
+      margin-top: .15rem; line-height: 1;
+    }
+    .stat-chip .stat-sub {
+      font-size: .75rem; color: var(--gray-300); margin-top: .2rem;
+    }
+
+    /* ── Alert box ─────────────────────────────────────────────── */
+    .alert {
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      font-size: .88rem; line-height: 1.55;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: flex-start; gap: .7rem;
+    }
+    .alert-info {
+      background: #e8f4fd; border: 1px solid #bee3f8; color: #2c5f8a;
+    }
+    .alert-warn {
+      background: #fef9e7; border: 1px solid #f7dc6f; color: #7d6608;
+    }
+    .alert-green {
+      background: var(--green-pale); border: 1px solid var(--green-light); color: var(--green-dark);
+    }
+    .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Lightbox ──────────────────────────────────────────────── */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.85); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 94vw; max-height: 90vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      object-fit: contain;
+    }
+    .lightbox-close {
+      position: fixed; top: 1rem; right: 1.5rem;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,.15); border: none;
+      color: white; font-size: 1.3rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--transition);
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,.3); }
+    .lightbox-caption {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.7); color: white;
+      padding: .5rem 1.2rem; border-radius: 99px;
+      font-size: .82rem; white-space: nowrap;
+    }
+
+    /* ── Table ─────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .data-table th {
+      background: var(--green-deep); color: var(--white);
+      padding: .7rem 1rem; text-align: left; font-weight: 600;
+      font-size: .78rem; letter-spacing: .4px;
+    }
+    .data-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+    .data-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+    .data-table td {
+      padding: .65rem 1rem;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+    }
+    .data-table tr:hover td { background: var(--green-pale); }
+    .data-table td.mono { font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+    .badge-best {
+      display: inline-block; background: var(--green-mid); color: var(--white);
+      font-size: .68rem; font-weight: 700; padding: .15rem .5rem;
+      border-radius: 4px; margin-left: .5rem;
+    }
+
+    /* ── Progress bar ──────────────────────────────────────────── */
+    .progress-bar {
+      height: 7px; background: var(--gray-100); border-radius: 99px;
+      overflow: hidden; margin-top: .3rem;
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--green-bright));
+      border-radius: 99px; transition: width .6s ease;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 4rem; padding: 1.8rem 2rem;
+      background: var(--green-deep); color: var(--green-light);
+      text-align: center; font-size: .78rem; opacity: .85;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .figure-grid { grid-template-columns: 1fr; }
+      .nav { padding: 0 1rem; }
+      .hero-title { font-size: 1.4rem; }
+      .main-content { padding: 1.5rem 1rem; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <div class="brand-badge">I A</div>
+    <span>Deep Learning TP</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Accueil</a>
+    <a href="/partie1" class="nav-link {% if request.path == '/partie1' %}active{% endif %}">
+      Partie 1 — Classification
+    </a>
+    <a href="/partie2" class="nav-link {% if request.path == '/partie2' %}active{% endif %}">
+      Partie 2 — Reseaux de Neurones
+    </a>
+    <a href="/methodes" class="nav-link {% if request.path == '/methodes' %}active{% endif %}">
+      Methodologie
+    </a>
+    <a href="/predictions" class="nav-link {% if request.path == '/predictions' %}active{% endif %}">
+      Predictions
+    </a>
+  </div>
+  <div class="nav-right">DIPES 2 &nbsp;|&nbsp; 2025-2026</div>
+</nav>
+
+<!-- Main -->
+{% block content %}{% endblock %}
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">x</button>
+  <img id="lightbox-img" src="" alt="" />
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  Intelligence Artificielle — TD-TP Reseaux de Neurones &amp; Deep Learning
+  &nbsp;|&nbsp; DIPES 2 : 4eme annee (S2) &nbsp;|&nbsp; 2025-2026 
+</footer>
+
+<script>
+  function openLightbox(src, caption) {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-caption').textContent = caption || '';
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(e) {
+    if (!e || e.target === document.getElementById('lightbox') || e.target.classList.contains('lightbox-close')) {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox({target: document.getElementById('lightbox')}); });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
