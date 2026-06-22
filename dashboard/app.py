@@ -10,6 +10,8 @@ import glob
 import base64
 from pathlib import Path
 
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
 import predict_engine
 
 app = Flask(__name__)
@@ -427,7 +429,3 @@ def api_stats():
         }
     })
 
-"""
-if __name__ == "__main__":
-    app.run(debug=True, port=5050)
-"""
